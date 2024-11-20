@@ -51,7 +51,7 @@ def exibir_grafico_personalizado(valores_digitados, classificacoes):
     plt.title("Valores Digitados e suas Classificações")
     plt.xlabel("Índice")
     plt.ylabel("Primeiro Atributo dos Valores")
-    plt.colorbar(label="0 = HoReCa, 1 = Retail")
+    # plt.colorbar(label="0 = HoReCa, 1 = Retail")
     plt.legend()
     plt.show()
 

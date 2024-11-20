@@ -1,111 +1,119 @@
 import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.neural_network import MLPClassifier
 from sklearn.naive_bayes import GaussianNB
-from sklearn.metrics import accuracy_score, classification_report
-import matplotlib.pyplot as plt
+from sklearn.metrics import classification_report, confusion_matrix, ConfusionMatrixDisplay
+import os
 
-# 1. Leitura dos dados do CSV "Wholesale customers"
-df = pd.read_csv('/home/itamar/Área de Trabalho/AG02-2024/wholesale_customers.csv')
+def carregar_dados():
+    """Carrega e ajusta os dados para o treinamento."""
+    dados = pd.read_csv('wholesale.csv')
+    X = dados.drop(columns=['Channel'])
+    y = dados['Channel'] - 1  # Ajusta para 0 e 1
+    return X, y
 
-# 2. Mapeamento das colunas categóricas para inteiros
-channel_map = {'HoReCa': 0, 'Retail': 1}
-region_map = {'Lisbon': 0, 'Oporto': 1, 'Other': 2}
-df['Channel'] = df['Channel'].map(channel_map)
-df['Region'] = df['Region'].map(region_map)
+def escolher_modelo(opcao):
+    """Retorna o modelo com base na opção escolhida."""
+    if opcao == 1:
+        return DecisionTreeClassifier(), "Árvore de Decisão"
+    elif opcao == 2:
+        return KNeighborsClassifier(), "k-Nearest Neighbors"
+    elif opcao == 3:
+        return MLPClassifier(max_iter=500), "Multilayer Perceptron"
+    elif opcao == 4:
+        return GaussianNB(), "Naive Bayes"
+    else:
+        return None, None
 
-# 3. Reorganização das colunas conforme especificado
-column_order = ['Region', 'Fresh', 'Milk', 'Grocery', 'Frozen', 'Detergents_Paper', 'Delicatessen', 'Channel']
-df = df[column_order]
+def exibir_matriz_confusao(y_teste, y_pred):
+    """Exibe um gráfico visual da matriz de confusão."""
+    matriz = confusion_matrix(y_teste, y_pred)
+    disp = ConfusionMatrixDisplay(confusion_matrix=matriz, display_labels=["HoReCa", "Retail"])
+    disp.plot(cmap=plt.cm.Blues)
+    plt.title("Matriz de Confusão")
+    plt.show(block=True)  # Janela interativa que bloqueia até ser fechada
 
-# 4. Visualização dos dados com gráficos de dispersão
-colors = {0: 'blue', 1: 'orange'}  # Usando os valores numéricos de Channel para colorir
-
-# Gráfico 1: Gasto com Fresh vs. Gasto com Milk
-plt.figure(figsize=(10, 6))
-for channel, group in df.groupby('Channel'):
-    plt.scatter(group['Fresh'], group['Milk'], c=colors[channel], label=f'Channel {channel}')
-plt.xlabel('Gasto com Fresh (u.m.)')
-plt.ylabel('Gasto com Milk (u.m.)')
-plt.title('Gasto com Fresh vs. Gasto com Milk por Canal de Vendas')
-plt.legend()
-plt.show()
-
-# Gráfico 2: Gasto com Grocery vs. Gasto com Detergents_Paper
-plt.figure(figsize=(10, 6))
-for channel, group in df.groupby('Channel'):
-    plt.scatter(group['Grocery'], group['Detergents_Paper'], c=colors[channel], label=f'Channel {channel}')
-plt.xlabel('Gasto com Grocery (u.m.)')
-plt.ylabel('Gasto com Detergents Paper (u.m.)')
-plt.title('Gasto com Grocery vs. Gasto com Detergents Paper por Canal de Vendas')
-plt.legend()
-plt.show()
-
-# Gráfico 3: Gasto com Frozen vs. Gasto com Delicatessen
-plt.figure(figsize=(10, 6))
-for channel, group in df.groupby('Channel'):
-    plt.scatter(group['Frozen'], group['Delicatessen'], c=colors[channel], label=f'Channel {channel}')
-plt.xlabel('Gasto com Frozen (u.m.)')
-plt.ylabel('Gasto com Delicatessen (u.m.)')
-plt.title('Gasto com Frozen vs. Gasto com Delicatessen por Canal de Vendas')
-plt.legend()
-plt.show()
-
-# 5. Separar os atributos (X) da classe (y)
-X = df.drop('Channel', axis=1)
-y = df['Channel']
-
-# 6. Divisão dos dados em treino e teste
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-
-# 7. Treinamento dos modelos de ML
-clf_dt = DecisionTreeClassifier()
-clf_knn = KNeighborsClassifier(n_neighbors=3)
-clf_mlp = MLPClassifier(random_state=42)
-clf_nb = GaussianNB()
-
-# Treinamento dos modelos
-clf_dt.fit(X_train, y_train)
-clf_knn.fit(X_train, y_train)
-clf_mlp.fit(X_train, y_train)
-clf_nb.fit(X_train, y_train)
-
-# 8. Avaliação dos modelos
-y_pred_dt = clf_dt.predict(X_test)
-y_pred_knn = clf_knn.predict(X_test)
-y_pred_mlp = clf_mlp.predict(X_test)
-y_pred_nb = clf_nb.predict(X_test)
-
-print("Árvore de Decisão:")
-print(classification_report(y_test, y_pred_dt))
-print("\nKNN:")
-print(classification_report(y_test, y_pred_knn))
-print("\nMLP:")
-print(classification_report(y_test, y_pred_mlp))
-print("\nNaive Bayes:")
-print(classification_report(y_test, y_pred_nb))
-
-# 9. Função para previsão com base na entrada do usuário
-def predict_channel_with_input(region, fresh, milk, grocery, frozen, detergents_paper, delicatessen):
-    # Fazendo a previsão
-    prediction = clf_dt.predict([[region, fresh, milk, grocery, frozen, detergents_paper, delicatessen]])[0]
+def exibir_grafico_personalizado(valores_digitados, classificacoes):
+    """Exibe um gráfico com os valores digitados pelo usuário e suas classificações."""
+    if not valores_digitados:
+        print("Nenhum valor digitado para exibir no gráfico.")
+        return
     
-    # Traduzindo a previsão
-    inverse_channel_map = {v: k for k, v in channel_map.items()}
-    predicted_channel = inverse_channel_map[prediction]
-    
-    # Mostrando o resultado
-    print(f"O canal de vendas previsto é: {predicted_channel}")
+    valores_array = np.array(valores_digitados)
+    x = np.arange(len(valores_digitados))  # Índices dos valores digitados
 
-# Exemplo de uso
-region_input = int(input("Digite o número da região (0 para Lisbon, 1 para Oporto, 2 para Other): "))
-fresh_input = float(input("Digite o gasto anual com produtos frescos (u.m.): "))
-milk_input = float(input("Digite o gasto anual com laticínios (u.m.): "))
-grocery_input = float(input("Digite o gasto anual com produtos de mercearia (u.m.): "))
-frozen_input = float(input("Digite o gasto anual com produtos congelados (u.m.): "))
-detergents_paper_input = float(input("Digite o gasto anual com detergentes e produtos de papel (u.m.): "))
-delicatessen_input = float(input("Digite o gasto anual com guloseimas (u.m.): "))
+    plt.figure(figsize=(10, 6))
+    plt.scatter(x, valores_array[:, 0], c=classificacoes, cmap='coolwarm', label="Classificação")
+    plt.title("Valores Digitados e suas Classificações")
+    plt.xlabel("Índice")
+    plt.ylabel("Primeiro Atributo dos Valores")
+    plt.colorbar(label="0 = HoReCa, 1 = Retail")
+    plt.legend()
+    plt.show()
 
-predict_channel_with_input(region_input, fresh_input, milk_input, grocery_input, frozen_input, detergents_paper_input, delicatessen_input)
+def main():
+    print("\nBem-vindo! Vamos classificar canais de venda (HoReCa ou Retail).")
+
+    # Carregar e dividir os dados
+    X, y = carregar_dados()
+    X_treino, X_teste, y_treino, y_teste = train_test_split(X, y, test_size=0.2, random_state=42)
+
+    # Menu para escolher o modelo
+    print("\n--- MENU PRINCIPAL ---")
+    print("1. Árvore de Decisão")
+    print("2. k-Nearest Neighbors")
+    print("3. Multilayer Perceptron")
+    print("4. Naive Bayes")
+    modelo_opcao = int(input("Escolha o modelo desejado: ").strip())
+    modelo, nome_modelo = escolher_modelo(modelo_opcao)
+
+    if modelo is None:
+        print("Opção inválida. Encerrando o programa.")
+        return
+
+    print(f"\nModelo escolhido: {nome_modelo}")
+
+    # Treinando o modelo
+    print("\nTreinando o modelo...")
+    modelo.fit(X_treino, y_treino)
+
+    # Testando o modelo
+    print("\nTestando o modelo...")
+    y_pred = modelo.predict(X_teste)
+
+    print("\nRelatório de Classificação:")
+    print(classification_report(y_teste, y_pred))
+
+    valores_digitados = []
+    classificacoes = []
+
+    while True:
+        entrada = input("\nDigite os valores separados por vírgula (ou 'sair' para encerrar, 'g' para exibir matriz de confusão, 'e' para exibir gráfico personalizado): ").strip()
+        if entrada.lower() == 'sair':
+            print("Encerrando o programa. Até mais!")
+            break
+        elif entrada.lower() == 'g':
+            print("Gerando matriz de confusão...")
+            exibir_matriz_confusao(y_teste, y_pred)
+        elif entrada.lower() == 'e':
+            print("Gerando gráfico personalizado...")
+            exibir_grafico_personalizado(valores_digitados, classificacoes)
+        else:
+            try:
+                valores = np.array([float(x) for x in entrada.split(',')]).reshape(1, -1)
+                resultado = modelo.predict(valores)[0]
+                print(f"Resultado: {'HoReCa' if resultado == 0 else 'Retail'}")
+
+                # Armazena os valores e suas classificações para o gráfico
+                valores_digitados.append(valores[0])
+                classificacoes.append(resultado)
+            except ValueError:
+                print("Erro nos valores. Insira os dados corretamente.")
+
+if __name__ == "__main__":
+    os.environ['MPLBACKEND'] = 'TkAgg'
+    main()

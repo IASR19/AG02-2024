@@ -33,18 +33,19 @@ Este programa utiliza **Machine Learning** para classificar canais de venda em d
 ```
 
 3. Escolha o modelo de treinamento no menu:
-        1: Árvore de Decisão
-        2: k-Nearest Neighbors
-        3: Multilayer Perceptron
-        4: Naive Bayes
+    - `1`: Árvore de Decisão
+    - `2`: k-Nearest Neighbors
+    - `3`: Multilayer Perceptron
+    - `4`: Naive Bayes
 
 4. Após o treinamento:
-    . Digite valores para classificação no formato: region,fresh,milk,grocery,frozen,detergents_paper,delicatessen.
-    . Utilize as seguintes opções especiais:
-            - g: Exibir matriz de confusão.
-            - e: Exibir gráfico com os valores digitados e suas classificações.
-            - sair: Encerrar o programa.
-    . O programa espera os seguintes valores (em ordem):
+    - Digite valores para classificação no formato:
+      `region,fresh,milk,grocery,frozen,detergents_paper,delicatessen`.
+    - Utilize as seguintes opções especiais:
+        - `g`: Exibir matriz de confusão.
+        - `e`: Exibir gráfico com os valores digitados e suas classificações.
+        - `sair`: Encerrar o programa.
+    - O programa espera os seguintes valores (em ordem):
         1. `region`: Região (0 = Lisbon, 1 = Oporto, 2 = Other).
         2. `fresh`: Gasto anual em produtos frescos.
         3. `milk`: Gasto anual em leite.
@@ -52,6 +53,7 @@ Este programa utiliza **Machine Learning** para classificar canais de venda em d
         5. `frozen`: Gasto anual em produtos congelados.
         6. `detergents_paper`: Gasto anual em detergentes e papel.
         7. `delicatessen`: Gasto anual em guloseimas.
+
 
 # Requisitos
 

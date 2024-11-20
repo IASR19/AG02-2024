@@ -1,22 +1,3 @@
-# Funcionalidades
-
-1. **Escolha de Modelos de Machine Learning:**
-   - Árvore de Decisão
-   - k-Nearest Neighbors (k-NN)
-   - Multilayer Perceptron (MLP)
-   - Naive Bayes
-
-2. **Treinamento e Avaliação:**
-   - O programa treina o modelo escolhido e avalia seu desempenho, exibindo um **relatório de classificação** (precision, recall, f1-score).
-
-3. **Predição com Dados Inseridos:**
-   - O usuário pode inserir valores manualmente e receber a classificação correspondente (HoReCa ou Retail).
-
-4. **Visualização de Resultados:**
-   - Geração de uma **matriz de confusão** para análise de desempenho.
-   - Geração de um **gráfico personalizado** com os valores inseridos pelo usuário e suas respectivas classificações.
-
-
 # Classificador de Canais de Venda (HoReCa ou Retail)
 
 Este programa utiliza **Machine Learning** para classificar canais de venda em dois grupos: **HoReCa** (Hotéis, Restaurantes e Cafés) ou **Retail** (Varejo). Ele permite treinar diferentes modelos, visualizar métricas de desempenho e realizar predições com base em dados inseridos pelo usuário.

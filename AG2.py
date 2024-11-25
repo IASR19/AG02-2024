@@ -10,14 +10,14 @@ from sklearn.metrics import classification_report, confusion_matrix, ConfusionMa
 import os
 
 def carregar_dados():
-    """Carrega e ajusta os dados para o treinamento."""
+    # Carrega o dataset e ajusta os rótulos para começar em 0
     dados = pd.read_csv('wholesale.csv')
     X = dados.drop(columns=['Channel'])
-    y = dados['Channel'] - 1  # Ajusta para 0 e 1
+    y = dados['Channel'] - 1
     return X, y
 
 def escolher_modelo(opcao):
-    """Retorna o modelo com base na opção escolhida."""
+    # Retorna o modelo e o nome com base na escolha do usuário
     if opcao == 1:
         return DecisionTreeClassifier(), "Árvore de Decisão"
     elif opcao == 2:
@@ -30,39 +30,39 @@ def escolher_modelo(opcao):
         return None, None
 
 def exibir_matriz_confusao(y_teste, y_pred):
-    """Exibe um gráfico visual da matriz de confusão."""
+    # Gera e exibe a matriz de confusão
     matriz = confusion_matrix(y_teste, y_pred)
     disp = ConfusionMatrixDisplay(confusion_matrix=matriz, display_labels=["HoReCa", "Retail"])
     disp.plot(cmap=plt.cm.Blues)
     plt.title("Matriz de Confusão")
-    plt.show(block=True)  # Janela interativa que bloqueia até ser fechada
+    plt.show(block=True)
 
 def exibir_grafico_personalizado(valores_digitados, classificacoes):
-    """Exibe um gráfico com os valores digitados pelo usuário e suas classificações."""
+    # Gera um gráfico com os valores digitados e suas classificações
     if not valores_digitados:
         print("Nenhum valor digitado para exibir no gráfico.")
         return
     
     valores_array = np.array(valores_digitados)
-    x = np.arange(len(valores_digitados))  # Índices dos valores digitados
+    x = np.arange(len(valores_digitados))
 
     plt.figure(figsize=(10, 6))
     plt.scatter(x, valores_array[:, 0], c=classificacoes, cmap='coolwarm', label="Classificação")
     plt.title("Valores Digitados e suas Classificações")
     plt.xlabel("Índice")
     plt.ylabel("Primeiro Atributo dos Valores")
-    # plt.colorbar(label="0 = HoReCa, 1 = Retail")
     plt.legend()
     plt.show()
 
 def main():
+    # Fluxo principal do programa
     print("\nBem-vindo! Vamos classificar canais de venda (HoReCa ou Retail).")
 
-    # Carregar e dividir os dados
+    # Carregar os dados e dividir em treino e teste
     X, y = carregar_dados()
     X_treino, X_teste, y_treino, y_teste = train_test_split(X, y, test_size=0.2, random_state=42)
 
-    # Menu para escolher o modelo
+    # Menu de escolha do modelo
     print("\n--- MENU PRINCIPAL ---")
     print("1. Árvore de Decisão")
     print("2. k-Nearest Neighbors")
@@ -77,17 +77,15 @@ def main():
 
     print(f"\nModelo escolhido: {nome_modelo}")
 
-    # Treinando o modelo
-    print("\nTreinando o modelo...")
+    # Treinar o modelo
     modelo.fit(X_treino, y_treino)
 
-    # Testando o modelo
-    print("\nTestando o modelo...")
+    # Testar o modelo e exibir o relatório
     y_pred = modelo.predict(X_teste)
-
     print("\nRelatório de Classificação:")
     print(classification_report(y_teste, y_pred))
 
+    # Interação com o usuário para entrada de valores
     valores_digitados = []
     classificacoes = []
 
@@ -97,23 +95,23 @@ def main():
             print("Encerrando o programa. Até mais!")
             break
         elif entrada.lower() == 'g':
-            print("Gerando matriz de confusão...")
+            # Exibir a matriz de confusão
             exibir_matriz_confusao(y_teste, y_pred)
         elif entrada.lower() == 'e':
-            print("Gerando gráfico personalizado...")
+            # Exibir o gráfico personalizado
             exibir_grafico_personalizado(valores_digitados, classificacoes)
         else:
             try:
+                # Processar os valores digitados e classificar
                 valores = np.array([float(x) for x in entrada.split(',')]).reshape(1, -1)
                 resultado = modelo.predict(valores)[0]
                 print(f"Resultado: {'HoReCa' if resultado == 0 else 'Retail'}")
-
-                # Armazena os valores e suas classificações para o gráfico
                 valores_digitados.append(valores[0])
                 classificacoes.append(resultado)
             except ValueError:
                 print("Erro nos valores. Insira os dados corretamente.")
 
 if __name__ == "__main__":
+    # Configuração para backend do matplotlib
     os.environ['MPLBACKEND'] = 'TkAgg'
     main()
